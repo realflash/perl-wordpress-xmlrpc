@@ -33,8 +33,7 @@ This is really useful to automate new postings, uploading media, etc.
 
 =head2 WordPress version
 
-This code was built against xmlrpc.php included in WordPress 2.8.4.
-As new calls are included in xmlrpc.php, this module is be updated.
+This code has been tested against WordPress 4.5.3. Not all the calls available in the API at https://codex.wordpress.org/XML-RPC_WordPress_API are implemented. Please send patches.
 
 =head1 CONSTRUCTOR
 
@@ -74,16 +73,11 @@ Uploading a file..
    my $r = $o->newMediaObject($data);
    print $r->{url};
   
+=head1 DEPRECATED METHODS
+
+Since v1.23 WordPress have not just deprecated but obseleted a number of calls to do with pages and categories. The corresponding methods have been removed from this module, and are slowly being replaced with their current equivalents.
 
 =head1 METHODS
-
-=head2 xmlrpc_methods()
-
-Returns array of methods in this package that make calls via xmlrpc.
-
-=head2 server_methods()
-
-Returns array of server methods accessible via xmlrpc.
 
 =head2 username()
 
@@ -149,115 +143,6 @@ If the DEBUG flag is on, this warns to STDERR automatically as well.
 These methods specifically mirror the xmlrpc.php file provided by WordPress installations.
 This file sits on your website.
 
-=head3 getPage()
-
-Takes 1 args: page_id (number).
-Returns page hashref struct(ure).
-
-Example return:
-
-	 $val: {
-	         categories => [
-	                         'Uncategorized'
-	                       ],
-	         dateCreated => '20080121T12:38:30',
-	         date_created_gmt => '20080121T20:38:30',
-	         description => 'These are some interesting resources online.',
-	         excerpt => '',
-	         link => 'http://leocharre.com/perl-resources/',
-	         mt_allow_comments => '0',
-	         mt_allow_pings => '0',
-	         page_id => '87',
-	         page_status => 'publish',
-	         permaLink => 'http://leocharre.com/perl-resources/',
-	         text_more => '',
-	         title => 'Resources',
-	         userid => '2',
-	         wp_author => 'leocharre',
-	         wp_author_display_name => 'leocharre',
-	         wp_author_id => '2',
-	         wp_page_order => '0',
-	         wp_page_parent_id => '0',
-	         wp_page_parent_title => '',
-	         wp_password => '',
-	         wp_slug => 'perl-resources'
-	       }
-
-This is the same struct hashref you would send to newPage().
-
-=head3 getPages()
-
-Returns array ref.
-Each element is a hash ref same as getPage() returns.
-If you want less info, just basic info on each page, use getPageList().
-
-=head3 newPage()
-
-Takes 2 args: page (hashref), publish (boolean).
-You can leave out publish, as discussed further in this documentation.
-The hashref must have at least a title and description.
-Returns page id (number, assigned by server).
-
-=head3 deletePage()
-
-Takes 1 args: page_id (number).
-Returns boolean (true or false).
-
-=head3 editPage()
-
-First, required argument- is content struct page hashref.
-Second, optional argument- is publish boolean.
-(The page hashref is just as discussed in getPage().)
-
-You could use getPage(), edit the returned hashref, and resubmit with editPage().
-
-   my $page_hashref = $o->getPage(5);
-   
-   $page_hashref->{title} = 'This is the New Title';
-   
-   $o->editPage( $page_hashref ) 
-      or die( $o->errstr );
-
-Obviously the page id is in the page data (hashref), this is there inherently when you
-call getPage().
-
-The same would be done with the posts.
-
-=head4 Deprecating usage of:
-
-Optional first argument is page id number.
-Optional usage for same example above:
-   
-   $o->editPage( 5, { title => 'new title' } ) 
-      or die( $o->errstr );
-
-Page id must be present as first argument, or as key/value pair in content hashref.
-If the content hashref is what you got with getPage() for example, the page id is already present.
-
-=head3 getPageList()
-
-Returns arrayref.
-Each element is a hashref.
-This is sort of a short version of getPages(), which returns all info for each.
-
-Example return:
-
-	 $return_value: [
-	                  {
-	                    dateCreated => '20061113T11:08:22',
-	                    date_created_gmt => '20061113T19:08:22',
-	                    page_id => '2',
-	                    page_parent_id => '0',
-	                    page_title => 'About Moi'
-	                  },
-	                  {
-	                    dateCreated => '20080105T18:57:24',
-	                    date_created_gmt => '20080106T02:57:24',
-	                    page_id => '43',
-	                    page_parent_id => '74',
-	                    page_title => 'tree'
-	                  },
-	                ]
 
 =cut
 
@@ -284,166 +169,6 @@ Returns array ref, each element is a hashref.
 	                    user_login => 'chamon'
 	                  }
 	                ]
-
-=cut
-
-
-
-
-
-
-
-
-=pod
-
-=head3 getCategories()
-
-Takes no argument.
-Example return value:
-
-	 $return_value: [
-	                  {
-	                    categoryId => '4',
-	                    categoryName => 'art',
-	                    description => 'art',
-	                    htmlUrl => 'http://leocharre.com/articles/category/art/',
-	                    parentId => '0',
-	                    rssUrl => 'http://leocharre.com/articles/category/art/feed/'
-	                  },
-	                  {
-	                    categoryId => '1',
-	                    categoryName => 'Uncategorized',
-	                    description => 'Uncategorized',
-	                    htmlUrl => 'http://leocharre.com/articles/category/uncategorized/',
-	                    parentId => '0',
-	                    rssUrl => 'http://leocharre.com/articles/category/uncategorized/feed/'
-	                  }
-	                ]
-
-=head3 newCategory()
-
-Takes 1 args: category struct.
-Returns category id (number).
-
-The category struct is a hash ref alike..
-
-   {
-      name => 'Ugly houses',
-      parent_id => 34, # (if this is a sub category )
-      description => 'this is a great category',
-   }
-
-The key 'name' must be present or croaks.
-
-=head3 getCategory()
-
-Argument is category id, will return struct (hash ref).
-
-   $got: {
-           categoryId => 99,
-           categoryName => 'category772',
-           description => 'category772',
-           htmlUrl => 'http://leocharre.com/articles/category/category772/',
-           parentId => '0',
-           rssUrl => 'http://leocharre.com/articles/category/category772/feed/'
-         }
-
-=over 4
-
-=item CAVEAT 
-
-There seems to be a bug in xmlrpc.php (wordpress v 2.3.2) , that does not fill out 
-the categories properly. You can use  newCategory() to insert a description, bu
-upon getCategory(), the struct description is replaced by the categoryName field.
-
-=back
-
-=head3 suggestCategories()
-
-Takes 2 optional args: category, max_results.
-
-Returns array ref, each element is a hashref.
-
-Apparently it does a word match on the existing categories, if you provide 
-a category string argument.
-
-If you call it as the following..
-
-   $o->suggestCategories('draw');
-
-And you have a 'drawing' category, it returns:
-
-   $r: [
-         {
-           category_id => '187',
-           category_name => 'drawing'
-         }
-       ]
-
-With no arguments, example return:
-
-   $r: [
-         {
-           category_id => '4',
-           category_name => 'art'
-         },
-         {
-           category_id => '196',
-           category_name => 'category528'
-         },
-         {
-           category_id => '197',
-           category_name => 'category528 appended'
-         },
-         {
-           category_id => '203',
-           category_name => 'category919 appended'
-         },
-         {
-           category_id => '184',
-           category_name => 'design'
-         },
-         {
-           category_id => '183',
-           category_name => 'dev'
-         },
-         {
-           category_id => '187',
-           category_name => 'drawing'
-         },
-         {
-           category_id => '190',
-           category_name => 'graphic'
-         },
-         {
-           category_id => '5',
-           category_name => 'near life experience'
-         },
-         {
-           category_id => '188',
-           category_name => 'painting'
-         },
-         {
-           category_id => '189',
-           category_name => 'pinup'
-         },
-         {
-           category_id => '186',
-           category_name => 'web'
-         }
-       ]
-
-=head3 deleteCategory()
-
-Takes 1 args: category_id (number).
-Returns boolean.
-
-I suppose you could search for categories with the name 'bad' and delete them as..
-
-   for my $category_href ( @{ $o->suggestCategories('bad') } ){
-      $o->deleteCategory($category_href->{category_id})
-         or warn("Could not delete $category->{category_name});
-   }
 
 =cut
 
@@ -476,6 +201,17 @@ Example return value:
 
 Takes 1 args: struct (hashref).
 NOTE: Untested. If you have info on this, send it in.
+
+=head3 getCommentCount()
+
+Takes 1 args: post_ID
+Returns post struct, hashref.
+	$VAR1 = {
+          'awaiting_moderation' => '0',
+          'total_comments' => '0',
+          'spam' => '0',
+          'approved' => '0'
+        };
 
 =head3 deleteComment()
 
@@ -672,14 +408,20 @@ Returns post struct, hashref.
 	                          wp_slug => 'test_1201731544'
 	                        }
 
-=head3 getRecentPosts()
+=head3 getPostStatusList()
 
-Takes 1 args: num_posts (number, optional).
-Returns arrayref.
+Takes no argument.
+Returns hashref.
 
-Each element is hash ref same as getPost() would return.
+Example return value:
+	{
+          'draft' => 'Draft',
+          'publish' => 'Published',
+          'private' => 'Private',
+          'pending' => 'Pending Review'
+        };
 
-=head3 newMediaObject() uploadFile()
+=head3 uploadFile()
 
 Takes 1 args: data (hashref).
 The hashref keys and values are bits (Mime::Base64), type (mime type), and name (filename).
@@ -693,64 +435,6 @@ Returns result:
    ###     }
 
 Would be truly useful if it returned id!
-
-=head3 getTemplate()
-
-Takes 1 args: template name (string).
-NOTE: This fails. Don't know why. If you have any idea, contact AUTHOR.
-
-=head3 setTemplate()
-
-Takes 2 args: content, template.
-NOTE: Untested.
-
-=head3 getPageTemplates()
-
-Takes no args.
-Returns hashref.
-
-Example return:
-
-   return: {
-             Default => 'default',
-             'Link Categories' => 'link_categories.php',
-             Links => 'links.php'
-           }
-
-=head3 getTags()
-
-Takes no argument.
-Returns array ref. Each element is a hashref.
-
-Example return:
-
-   return: [
-             {
-               count => '1',
-               html_url => 'http://leocharre.com/articles/tag/avi/',
-               name => 'avi',
-               rss_url => 'http://leocharre.com/articles/tag/avi/feed/',
-               slug => 'avi',
-               tag_id => '158'
-             },
-             {
-               count => '1',
-               html_url => 'http://leocharre.com/articles/tag/bugzilla/',
-               name => 'bugzilla',
-               rss_url => 'http://leocharre.com/articles/tag/bugzilla/feed/',
-               slug => 'bugzilla',
-               tag_id => '195'
-             },
-             {
-               count => '1',
-               html_url => 'http://leocharre.com/articles/tag/callback/',
-               name => 'callback',
-               rss_url => 'http://leocharre.com/articles/tag/callback/feed/',
-               slug => 'callback',
-               tag_id => '30'
-             },
-           ]
-        ... .etc.....
 
 =head3 getUsersBlogs()
 

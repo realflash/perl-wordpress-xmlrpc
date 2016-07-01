@@ -8,40 +8,40 @@ $VERSION = sprintf "%d.%02d", q$Revision: 1.30 $ =~ /(\d+)/g;
 
 # METHOD LIST
 # WP API METHOD			MODULE METHOD		RELEVANT OBSELETE METHOD	SINCE
-# wp.getPost 			getPost			getPage 			3.4
+# wp.getPost 			getPost			getPage 				3.4
 # wp.getPosts			-			getRecentPosts,getPages,getPageList	3.4
-# wp.newPost			newPost			newPage				3.4
-# wp.editPost			editPost		editPage			3.4
-# wp.deletePost			deletePost						3.4
-# wp.getPostType									3.4
-# wp.getPostTypes									3.4
-# wp.getPostFormats									3.4
+# wp.newPost			newPost			newPage					3.4
+# wp.editPost			editPost		editPage				3.4
+# wp.deletePost			deletePost							3.4
+# wp.getPostType										3.4
+# wp.getPostTypes										3.4
+# wp.getPostFormats										3.4
 # wp.getPostStatusList		getPostStatusList	getPageStatusList 			3.4
-# wp.getTaxonomy					getCategories,getTags		3.4
-# wp.getTaxonomies									3.4
-# wp.getTerm										3.4
-# wp.getTerms										3.4
-# wp.newTerm						newCategory			3.4
-# wp.editTerm										3.4
+# wp.getTaxonomy					getCategories,getTags			3.4
+# wp.getTaxonomies										3.4
+# wp.getTerm											3.4
+# wp.getTerms											3.4
+# wp.newTerm						newCategory				3.4
+# wp.editTerm											3.4
 # wp.deleteTerm						deleteCategory				3.4
-# wp.getMediaItem									3.1
-# wp.getMediaLibrary									3.1
-# wp.uploadFile			uploadFile						3.1
-# wp.getCommentCount		getCommentCount						2.7
-# wp.getComment			getComment						2.7
-# wp.getComments		getComments						2.7
-# wp.newComment			newComment						2.7
-# wp.editComment		editComment						2.7
-# wp.deleteComment		deleteComment						2.7
-# wp.getCommentStatusList	getCommentStatusList					2.7
-# wp.getOptions			getOptions 						2.6
-# wp.setOptions			setOptions 						2.6
-# wp.getUsersBlogs		getUsersBlogs 						2.something
-# wp.getUser									3.5
-# wp.getUsers									3.5
-# wp.getProfile									3.5
-# wp.editProfile								3.5
-# wp.getAuthors			getAuthors					2.something
+# wp.getMediaItem										3.1
+# wp.getMediaLibrary										3.1
+# wp.uploadFile			uploadFile							3.1
+# wp.getCommentCount		getCommentCount							2.7
+# wp.getComment			getComment							2.7
+# wp.getComments		getComments							2.7
+# wp.newComment			newComment							2.7
+# wp.editComment		editComment							2.7
+# wp.deleteComment		deleteComment							2.7
+# wp.getCommentStatusList	getCommentStatusList						2.7
+# wp.getOptions			getOptions 							2.6
+# wp.setOptions			setOptions 							2.6
+# wp.getUsersBlogs		getUsersBlogs 							2.something
+# wp.getUser			getUser								3.5
+# wp.getUsers											3.5
+# wp.getProfile											3.5
+# wp.editProfile										3.5
+# wp.getAuthors			getAuthors							2.something
 
 sub xmlrpc_methods { qw/  suggestCategories getPageTemplates newMediaObjectgetTemplate setTemplate / }
 sub new {
@@ -1278,8 +1278,40 @@ sub setOptions {
 	return $result;
 }
 
-# New methods as of 3.5...
-# getUser getUsers getProfile editProfile
+# xmlrpc.php: function wp_getUser
+sub getUser {
+	my $self = shift;
+	my $blog_id = $self->blog_id;
+	my $username = $self->username;
+	my $password = $self->password;
+	my $user_id = shift;
+	my $fields = shift;
+
+	defined $user_id or confess('missing user id');
+	_is_number($user_id);
+	
+	$fields = undef unless defined($fields);
+	croak('arg is not array ref') if defined($fields) and ref $fields ne 'ARRAY';
+
+	my $call = $self->server->call(
+		'wp.getUser',
+		$blog_id,
+		$username,
+		$password,
+		$user_id,
+		$fields
+	);
+
+	if ($self->_call_has_fault($call))
+	{
+		return;
+	}
+
+	my $result = $call->result;
+	defined $result	or die('no result');
+
+	return $result;
+}
 
 
 sub _is_number { $_[0]=~/^\d+$/ ? $_[0] : confess("Argument '$_[0] ' is not number") }
