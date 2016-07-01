@@ -4,8 +4,46 @@ use strict;
 use Carp;
 use LEOCHARRE::Debug;
 use vars qw($VERSION $DEBUG);
-$VERSION = sprintf "%d.%02d", q$Revision: 1.23 $ =~ /(\d+)/g;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.30 $ =~ /(\d+)/g;
 
+# METHOD LIST
+# WP API METHOD			MODULE METHOD		RELEVANT OBSELETE METHOD	SINCE
+# wp.getPost 			getPost			getPage 			3.4
+# wp.getPosts			-			getRecentPosts,getPages,getPageList	3.4
+# wp.newPost			newPost			newPage				3.4
+# wp.editPost			editPost		editPage			3.4
+# wp.deletePost			deletePost						3.4
+# wp.getPostType									3.4
+# wp.getPostTypes									3.4
+# wp.getPostFormats									3.4
+# wp.getPostStatusList		getPostStatusList	getPageStatusList 			3.4
+# wp.getTaxonomy					getCategories,getTags		3.4
+# wp.getTaxonomies									3.4
+# wp.getTerm										3.4
+# wp.getTerms										3.4
+# wp.newTerm						newCategory			3.4
+# wp.editTerm										3.4
+# wp.deleteTerm						deleteCategory				3.4
+# wp.getMediaItem									3.1
+# wp.getMediaLibrary									3.1
+# wp.uploadFile			uploadFile						3.1
+# wp.getCommentCount		getCommentCount						2.7
+# wp.getComment			getComment						2.7
+# wp.getComments		getComments						2.7
+# wp.newComment			newComment						2.7
+# wp.editComment		editComment						2.7
+# wp.deleteComment		deleteComment						2.7
+# wp.getCommentStatusList	getCommentStatusList					2.7
+# wp.getOptions			getOptions 						2.6
+# wp.setOptions			setOptions 						2.6
+# wp.getUsersBlogs		getUsersBlogs 						2.something
+# wp.getUser									3.5
+# wp.getUsers									3.5
+# wp.getProfile									3.5
+# wp.editProfile								3.5
+# wp.getAuthors			getAuthors					2.something
+
+sub xmlrpc_methods { qw/  suggestCategories getPageTemplates newMediaObjectgetTemplate setTemplate / }
 sub new {
    my ($class,$self) = @_;
    $self||={};
@@ -77,9 +115,6 @@ sub server {
    }
    return $self->{server};
 }
-
-sub server_methods { qw/wp.getUsersBlogs wp.getPage wp.getPages wp.newPage wp.deletePage wp.editPage wp.getPageList wp.getAuthors wp.getCategories wp.getTags wp.newCategory wp.deleteCategory wp.suggestCategories wp.uploadFile wp.getCommentCount wp.getPostStatusList wp.getPageStatusList wp.getPageTemplates wp.getOptions wp.setOptions wp.getComment wp.getComments wp.deleteComment wp.editComment wp.newComment wp.getCommentStatusList blogger.getUsersBlogs blogger.getUserInfo blogger.getPost blogger.getRecentPosts blogger.getTemplate blogger.setTemplate blogger.newPost blogger.editPost blogger.deletePost metaWeblog.newPost metaWeblog.editPost metaWeblog.getPost metaWeblog.getRecentPosts metaWeblog.getCategories metaWeblog.newMediaObject metaWeblog.deletePost metaWeblog.getTemplate metaWeblog.setTemplate metaWeblog.getUsersBlogs mt.getCategoryList mt.getRecentPostTitles mt.getPostCategories mt.setPostCategories mt.supportedMethods mt.supportedTextFilters mt.getTrackbackPings mt.publishPost pingback.ping demo.sayHello demo.addTwoNumbers/ }
-sub xmlrpc_methods { qw/getUsersBlogs getPage getPages newPage deletePage editPage getPageList getAuthors getCategories getTags newCategory deleteCategory suggestCategories uploadFile getCommentCount getPostStatusList getPageStatusList getPageTemplates getOptions setOptions getComment getComments deleteComment editComment newComment getCommentStatusList newPost editPost getPost getRecentPosts getCategories newMediaObject deletePost getTemplate setTemplate getUsersBlogs/ }
 
 sub _call_has_fault {
    my $self = shift;
@@ -172,224 +207,232 @@ sub abs_path_to_media_object_data {
 
 # XML RPC METHODS
 
-
+# OBSELETE
 # xmlrpc.php: function wp_getPage
-sub getPage {
-	my $self = shift;
-	my $blog_id = $self->blog_id;
-	my $page_id = shift;
-	my $username = $self->username;
-	my $password = $self->password;
+# sub getPage {
+	# my $self = shift;
+	# my $blog_id = $self->blog_id;
+	# my $page_id = shift;
+	# my $username = $self->username;
+	# my $password = $self->password;
 
-	$page_id or confess('missing page id');  
+	# $page_id or confess('missing page id');  
 
-	my $call = $self->server->call(
-		'wp.getPage',
-		$blog_id,
-		$page_id,
-		$username,
-		$password,
-	);
+	# my $call = $self->server->call(
+		# 'wp.getPage',
+		# $blog_id,
+		# $page_id,
+		# $username,
+		# $password,
+	# );
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
+	# if ( $self->_call_has_fault($call)){
+		# return;
+	# }
 
-	my $result = $call->result;
-	defined $result
-		or die('no result');
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
 
-	return $result;
-}
+	# return $result;
+# }
 
-# xmlrpc.php: function wp_getPages
-sub getPages {
-	my $self = shift;
-	my $blog_id = $self->blog_id;
-	my $username = $self->username;
-	my $password = $self->password;
+# OBSELETE
+# # xmlrpc.php: function wp_getPages
+# sub getPages {
+	# my $self = shift;
+	# my $blog_id = $self->blog_id;
+	# my $username = $self->username;
+	# my $password = $self->password;
 	
 
-	my $call = $self->server->call(
-		'wp.getPages',
-		$blog_id,
-		$username,
-		$password,
-	);
+	# my $call = $self->server->call(
+		# 'wp.getPages',
+		# $blog_id,
+		# $username,
+		# $password,
+	# );
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
+	# if ( $self->_call_has_fault($call)){
+		# return;
+	# }
 
-	my $result = $call->result;
-	defined $result
-		or die('no result');
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
 
-	return $result;
-}
+	# return $result;
+# }
 
-# xmlrpc.php: function wp_newPage
-sub newPage {
-	my $self = shift;
-   my $blog_id = $self->blog_id;
-   my $username = $self->username;
-   my $password = $self->password;   
-	my $page = shift;
+# OBSELETE
+# # xmlrpc.php: function wp_newPage
+# sub newPage {
+	# my $self = shift;
+   # my $blog_id = $self->blog_id;
+   # my $username = $self->username;
+   # my $password = $self->password;   
+	# my $page = shift;
 
-	defined $page or confess('missing page arg');
-   ref $page eq 'HASH' or croak('arg is not hash ref');
+	# defined $page or confess('missing page arg');
+   # ref $page eq 'HASH' or croak('arg is not hash ref');
    
-	my $publish = shift;
-	unless (defined $publish) {
-		$publish = $self->publish;
-	}
+	# my $publish = shift;
+	# unless (defined $publish) {
+		# $publish = $self->publish;
+	# }
 
-   
-
-	my $call = $self->server->call(
-		'wp.newPage',
-      $blog_id, # ignored
-      $username, # i had missed these!!!
-      $password,
-		$page,
-		$publish,
-	);
-
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
-}
-
-# xmlrpc.php: function wp_deletePage
-sub deletePage {
-	my $self       = shift;
-	my $blog_id    = $self->blog_id;  
-	my $username   = $self->username;
-	my $password   = $self->password;
-	my $page_id    = shift;
-
-	defined $page_id or confess('missing page id arg');
    
 
-	my $call = $self->server->call(
-		'wp.deletePage',
-		$blog_id,
-		$username,
-		$password,
-		$page_id,
-	);
+	# my $call = $self->server->call(
+		# 'wp.newPage',
+      # $blog_id, # ignored
+      # $username, # i had missed these!!!
+      # $password,
+		# $page,
+		# $publish,
+	# );
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
+	# if ( $self->_call_has_fault($call)){
+		# return;
+	# }
 
-	my $result = $call->result;
-	defined $result
-		or die('no result');
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
 
-	return $result;
-}
+	# return $result;
+# }
 
-# xmlrpc.php: function wp_editPage
-sub editPage {
-	my $self    = shift;
-   my($blog_id, $page_id, $content, $publish);
-	$blog_id    = $self->blog_id;
+
+# OBSELETE
+# # xmlrpc.php: function wp_deletePage
+# sub deletePage {
+	# my $self       = shift;
+	# my $blog_id    = $self->blog_id;  
+	# my $username   = $self->username;
+	# my $password   = $self->password;
+	# my $page_id    = shift;
+
+	# defined $page_id or confess('missing page id arg');
+   
+
+	# my $call = $self->server->call(
+		# 'wp.deletePage',
+		# $blog_id,
+		# $username,
+		# $password,
+		# $page_id,
+	# );
+
+	# if ( $self->_call_has_fault($call)){
+		# return;
+	# }
+
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
+
+	# return $result;
+# }
+
+
+# OBSELETE
+# # xmlrpc.php: function wp_editPage
+# sub editPage {
+	# my $self    = shift;
+   # my($blog_id, $page_id, $content, $publish);
+	# $blog_id    = $self->blog_id;
   
-   # the following hack is a workaround for getting args as one of:
-   # $id, $content, $publish
-   # $content, $publish
-   # $content
-   # $id, $content
+   # # the following hack is a workaround for getting args as one of:
+   # # $id, $content, $publish
+   # # $content, $publish
+   # # $content
+   # # $id, $content
 
-   # i know.. this is a very ugly hack   
-   my $_arg_1 = shift;
-   if ($_arg_1=~/^\d+$/){
-      $page_id=$_arg_1;
-      $content = shift;
-      $publish = shift;
+   # # i know.. this is a very ugly hack   
+   # my $_arg_1 = shift;
+   # if ($_arg_1=~/^\d+$/){
+      # $page_id=$_arg_1;
+      # $content = shift;
+      # $publish = shift;
 
-	   (defined $content and ( ref $content ) and ( ref $content eq 'HASH' ))
-         or confess('content arg is not hash ref');
-   }
+	   # (defined $content and ( ref $content ) and ( ref $content eq 'HASH' ))
+         # or confess('content arg is not hash ref');
+   # }
 
-   else {
-      $content = $_arg_1;      
-      $publish = shift;
-      ( defined $content and (ref $content) and (ref $content eq 'HASH'))
-         or confess('content arg is not hash ref');
+   # else {
+      # $content = $_arg_1;      
+      # $publish = shift;
+      # ( defined $content and (ref $content) and (ref $content eq 'HASH'))
+         # or confess('content arg is not hash ref');
 
-      $page_id = $content->{page_id}
-         or confess("missing page_id in content hashref");
-   }
-
-   
-
-   my $password   = $self->password;
-   my $username   = $self->username;
-
-
-   ( defined $page_id and $page_id=~/^\d+$/ )
-      or confess('missing page id arg');
+      # $page_id = $content->{page_id}
+         # or confess("missing page_id in content hashref");
+   # }
 
    
-	unless (defined $publish) {
-		$publish = $self->publish;
-	}
+
+   # my $password   = $self->password;
+   # my $username   = $self->username;
+
+
+   # ( defined $page_id and $page_id=~/^\d+$/ )
+      # or confess('missing page id arg');
+
+   
+	# unless (defined $publish) {
+		# $publish = $self->publish;
+	# }
    
 
-	my $call = $self->server->call(
-		'wp.editPage',
-		$blog_id,
-      $page_id,
-      $username,
-      $password,
-		$content,
-		$publish,
-	);
+	# my $call = $self->server->call(
+		# 'wp.editPage',
+		# $blog_id,
+      # $page_id,
+      # $username,
+      # $password,
+		# $content,
+		# $publish,
+	# );
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
+	# if ( $self->_call_has_fault($call)){
+		# return;
+	# }
 
-	my $result = $call->result;
-	defined $result
-		or die('no result');
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
 
-	return $result;
-}
-
-# xmlrpc.php: function wp_getPageList
-sub getPageList {
-	my $self = shift;
-	my $blog_id = $self->blog_id;
-	my $username = $self->username;
-	my $password = $self->password;
+	# return $result;
+# }
 
 
-	my $call = $self->server->call(
-		'wp.getPageList',
-		$blog_id,
-		$username,
-		$password,
-	);
+# OBSELETE
+# # xmlrpc.php: function wp_getPageList
+# sub getPageList {
+	# my $self = shift;
+	# my $blog_id = $self->blog_id;
+	# my $username = $self->username;
+	# my $password = $self->password;
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
 
-	my $result = $call->result;
-	defined $result
-		or die('no result');
+	# my $call = $self->server->call(
+		# 'wp.getPageList',
+		# $blog_id,
+		# $username,
+		# $password,
+	# );
 
-	return $result;
-}
+	# if ( $self->_call_has_fault($call)){
+		# return;
+	# }
+
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
+
+	# return $result;
+# }
 
 # xmlrpc.php: function wp_getAuthors
 sub getAuthors {
@@ -418,104 +461,108 @@ sub getAuthors {
 }
 
 
+#
+# OBSELETE
 # xmlrpc.php: function wp_newCategory
-sub newCategory {
-	my $self = shift;
-	my $blog_id = $self->blog_id;
-	my $username = $self->username;
-	my $password = $self->password;
-	my $category = shift;
-   (ref $category and ref $category eq 'HASH')
-      or croak("category must be a hash ref");
+# sub newCategory {
+	# my $self = shift;
+	# my $blog_id = $self->blog_id;
+	# my $username = $self->username;
+	# my $password = $self->password;
+	# my $category = shift;
+   # (ref $category and ref $category eq 'HASH')
+      # or croak("category must be a hash ref");
 
-   $category->{name} or confess('missing name in category struct');
+   # $category->{name} or confess('missing name in category struct');
    
 
-   ### $category
+   # ### $category
 
-	defined $category or confess('missing category string');
+	# defined $category or confess('missing category string');
 
-	my $call = $self->server->call(
-		'wp.newCategory',
-		$blog_id,
-		$username,
-		$password,
-		$category,
-	);
+	# my $call = $self->server->call(
+		# 'wp.newCategory',
+		# $blog_id,
+		# $username,
+		# $password,
+		# $category,
+	# );
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
+	# if ( $self->_call_has_fault($call)){
+		# return;
+	# }
 
-	my $result = $call->result;
-	defined $result
-		or die('no result');
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
 
-	return $result;
-}
+	# return $result;
+# }
 
 # xmlrpc.php: function wp_suggestCategories
-sub suggestCategories {
-	my $self = shift;
-	my $blog_id = $self->blog_id;
-	my $username = $self->username;
-	my $password = $self->password;
-	my $category = shift;
-	my $max_results = shift; # optional
+# sub suggestCategories {
+	# my $self = shift;
+	# my $blog_id = $self->blog_id;
+	# my $username = $self->username;
+	# my $password = $self->password;
+	# my $category = shift;
+	# my $max_results = shift; # optional
 
 	
 
-	my $call = $self->server->call(
-		'wp.suggestCategories',
-		$blog_id,
-		$username,
-		$password,
-		$category,
-		$max_results,
-	);
+	# my $call = $self->server->call(
+		# 'wp.suggestCategories',
+		# $blog_id,
+		# $username,
+		# $password,
+		# $category,
+		# $max_results,
+	# );
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
+	# if ( $self->_call_has_fault($call)){
+		# return;
+	# }
 
-	my $result = $call->result;
-	defined $result
-		or die('no result');
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
 
-	return $result;
-}
-
-
+	# return $result;
+# }
 
 
+
+
+
+# OBSELETE
 # xmlrpc.php: function mw_newMediaObject
-*uploadFile = \&newMediaObject;
-sub newMediaObject {
-	my $self = shift;
-	my $blog_id = $self->blog_id;
-	my $data = shift;
+# *uploadFile = \&newMediaObject;
+# sub newMediaObject {
+	# my $self = shift;
+	# my $blog_id = $self->blog_id;
+	# my $data = shift;
 
-   defined $data or confess('missing data hash ref arg');
-   ref $data eq 'HASH' or croak('arg is not hash ref');
+   # defined $data or confess('missing data hash ref arg');
+   # ref $data eq 'HASH' or croak('arg is not hash ref');
 
-	my $call = $self->server->call(
-		'metaWeblog.newMediaObject',
-		$blog_id,
-      $self->username,
-      $self->password,
-		$data,
-	);
+	# my $call = $self->server->call(
+		# 'metaWeblog.newMediaObject',
+		# $blog_id,
+      # $self->username,
+      # $self->password,
+		# $data,
+	# );
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
+	# if ( $self->_call_has_fault($call)){
+		# return;
+	# }
 
-	my $result = $call->result;
-	defined $result
-		or die('no result');
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
 
-	return $result;
-}
+	# return $result;
+# }
 
 
 
@@ -616,78 +663,83 @@ sub getPost {
 	return $result;
 }
 
+
+# OBSELETE
 # xmlrpc.php: function mw_getRecentPosts
-sub getRecentPosts {
-	my $self = shift;
-	my $blog_id = $self->blog_id;
-	my $user_login = $self->username;
-	my $user_pass = $self->password;
-	my $num_posts = shift;
+# sub getRecentPosts {
+	# my $self = shift;
+	# my $blog_id = $self->blog_id;
+	# my $user_login = $self->username;
+	# my $user_pass = $self->password;
+	# my $num_posts = shift;
    
 
-	my $call = $self->server->call(
-		'metaWeblog.getRecentPosts',
-		$blog_id,
-		$user_login,
-		$user_pass,
-		$num_posts,
-	);
+	# my $call = $self->server->call(
+		# 'metaWeblog.getRecentPosts',
+		# $blog_id,
+		# $user_login,
+		# $user_pass,
+		# $num_posts,
+	# );
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
+	# if ( $self->_call_has_fault($call)){
+		# return;
+	# }
 
-	my $result = $call->result;
-	defined $result
-		or die('no result');
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
 
-	return $result;
-}
+	# return $result;
+# }
 
+
+# OBSELETE
 # xmlrpc.php: function mw_getCategories
-sub getCategories {
-	my $self = shift;
-	my $blog_id = $self->blog_id;
-	my $user_login = $self->username;
-	my $user_pass = $self->password;
+# sub getCategories {
+	# my $self = shift;
+	# my $blog_id = $self->blog_id;
+	# my $user_login = $self->username;
+	# my $user_pass = $self->password;
    
 
-	my $call = $self->server->call(
-		'metaWeblog.getCategories',
-		$blog_id,
-		$user_login,
-		$user_pass,
-	);
+	# my $call = $self->server->call(
+		# 'metaWeblog.getCategories',
+		# $blog_id,
+		# $user_login,
+		# $user_pass,
+	# );
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
+	# if ( $self->_call_has_fault($call)){
+		# return;
+	# }
 
-	my $result = $call->result;
-	defined $result
-		or die('no result');
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
 
-	return $result;
-}
+	# return $result;
+# }
 
 
-# this nextone doesn't really exist.. this is a hack ..
-# this is not keeping in par with xmlrpc.php but.. shikes..
-sub getCategory {
-   my $self = shift;
-   my $id = shift;
-   $id or croak('missing id argument');
+# OBSELETE
+# # this nextone doesn't really exist.. this is a hack ..
+# # this is not keeping in par with xmlrpc.php but.. shikes..
+# sub getCategory {
+   # my $self = shift;
+   # my $id = shift;
+   # $id or croak('missing id argument');
 
-   # get all categorise
+   # # get all categorise
 
-   my @cat = grep { $_->{categoryId} == $id } @{$self->getCategories};
+   # my @cat = grep { $_->{categoryId} == $id } @{$self->getCategories};
 
-   @cat and scalar @cat 
-      or $self->errstr("Category id $id not found.")
-      and return;
+   # @cat and scalar @cat 
+      # or $self->errstr("Category id $id not found.")
+      # and return;
 
-   return $cat[0];
-}
+   # return $cat[0];
+# }
 
 
 
@@ -726,70 +778,72 @@ sub deletePost {
 	return $result;
 }
 
+
+# OBSELETE
 # xmlrpc.php: function blogger_getTemplate
-sub getTemplate { # TODO this fails, why????
-	my $self = shift;
-	my $blog_id = $self->blog_id;
-	my $user_login = $self->username;
-	my $user_pass = $self->password;
-	my $template = shift;   
+# sub getTemplate { # TODO this fails, why????
+	# my $self = shift;
+	# my $blog_id = $self->blog_id;
+	# my $user_login = $self->username;
+	# my $user_pass = $self->password;
+	# my $template = shift;   
 
-	defined $template or confess('missing template string');   
-   ### $template
-   ### $blog_id
-   ### $user_login
-   ### $user_pass
-	my $call = $self->server->call(
-		'metaWeblog.getTemplate',
-		$blog_id,
-		$user_login,
-		$user_pass,
-		$template,
-	);
+	# defined $template or confess('missing template string');   
+   # ### $template
+   # ### $blog_id
+   # ### $user_login
+   # ### $user_pass
+	# my $call = $self->server->call(
+		# 'metaWeblog.getTemplate',
+		# $blog_id,
+		# $user_login,
+		# $user_pass,
+		# $template,
+	# );
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
+	# if ( $self->_call_has_fault($call)){
+		# return;
+	# }
 
-	my $result = $call->result;
-	defined $result
-		or die('no result');
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
 
-	return $result;
-}
+	# return $result;
+# }
 
-# xmlrpc.php: function blogger_setTemplate
-sub setTemplate {
-	my $self = shift;
-	my $blog_id = $self->blog_id;
-	my $user_login = $self->username;
-	my $user_pass = $self->password;
-	my $content = shift;
-	my $template = shift;
+# # xmlrpc.php: function blogger_setTemplate
+# sub setTemplate {
+	# my $self = shift;
+	# my $blog_id = $self->blog_id;
+	# my $user_login = $self->username;
+	# my $user_pass = $self->password;
+	# my $content = shift;
+	# my $template = shift;
 
-	defined $template or confess('missing template string arg');
-	defined $content or confess('missing content hash ref arg');
-   ref $content eq 'HASH' or croak('arg is not hash ref');
+	# defined $template or confess('missing template string arg');
+	# defined $content or confess('missing content hash ref arg');
+   # ref $content eq 'HASH' or croak('arg is not hash ref');
 
-	my $call = $self->server->call(
-		'metaWeblog.setTemplate',
-		$blog_id,
-		$user_login,
-		$user_pass,
-		$content,
-		$template,
-	);
+	# my $call = $self->server->call(
+		# 'metaWeblog.setTemplate',
+		# $blog_id,
+		# $user_login,
+		# $user_pass,
+		# $content,
+		# $template,
+	# );
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
+	# if ( $self->_call_has_fault($call)){
+		# return;
+	# }
 
-	my $result = $call->result;
-	defined $result
-		or die('no result');
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
 
-	return $result;
-}
+	# return $result;
+# }
 
 # xmlrpc.php: function blogger_getUsersBlogs
 sub getUsersBlogs {
@@ -824,33 +878,35 @@ sub getUsersBlogs {
 # getComments getOptions getPageStatusList getPageTemplates getPostStatusList
 # getTags newComment setOptions
 
+
+# OBSELETE
 # xmlrpc.php: function wp_deleteCategory
-sub deleteCategory {
-	my $self = shift;
-	my $blog_id = $self->blog_id;
-	my $username = $self->username;
-	my $password = $self->password;
-	my $category_id = shift;
-   _is_number($category_id);
+# sub deleteCategory {
+	# my $self = shift;
+	# my $blog_id = $self->blog_id;
+	# my $username = $self->username;
+	# my $password = $self->password;
+	# my $category_id = shift;
+   # _is_number($category_id);
 
-	my $call = $self->server->call(
-		'wp.deleteCategory',
-		$blog_id,
-		$username,
-		$password,
-		$category_id,
-	);
+	# my $call = $self->server->call(
+		# 'wp.deleteCategory',
+		# $blog_id,
+		# $username,
+		# $password,
+		# $category_id,
+	# );
 
-	if ( $self->_call_has_fault($call) ){
-		return;
-	}
+	# if ( $self->_call_has_fault($call) ){
+		# return;
+	# }
 
-	my $result = $call->result;
-	defined $result
-		or die('no result');
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
 
-	return $result;
-}
+	# return $result;
+# }
 
 # xmlrpc.php: function wp_deleteComment
 sub deleteComment {
@@ -1055,55 +1111,59 @@ sub getOptions {
 }
 
 
+
+# OBSELETE
 # xmlrpc.php: function wp_getPageStatusList
-sub getPageStatusList {
-	my $self = shift;
-	my $blog_id = $self->blog_id;
-	my $username = $self->username;
-	my $password = $self->password;
+# sub getPageStatusList {
+	# my $self = shift;
+	# my $blog_id = $self->blog_id;
+	# my $username = $self->username;
+	# my $password = $self->password;
 
-	my $call = $self->server->call(
-		'wp.getPageStatusList',
-		$blog_id,
-		$username,
-		$password,
-	);
+	# my $call = $self->server->call(
+		# 'wp.getPageStatusList',
+		# $blog_id,
+		# $username,
+		# $password,
+	# );
 
-	if ( $self->_call_has_fault($call) ){
-		return;
-	}
+	# if ( $self->_call_has_fault($call) ){
+		# return;
+	# }
 
-	my $result = $call->result;
-	defined $result
-		or die('no result');
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
 
-	return $result;
-}
+	# return $result;
+# }
 
-# xmlrpc.php: function wp_getPageTemplates
-sub getPageTemplates {
-	my $self = shift;
-	my $blog_id = $self->blog_id;
-	my $username = $self->username;
-	my $password = $self->password;
 
-	my $call = $self->server->call(
-		'wp.getPageTemplates',
-		$blog_id,
-		$username,
-		$password,
-	);
+# # OBSELETE
+# # xmlrpc.php: function wp_getPageTemplates
+# sub getPageTemplates {
+	# my $self = shift;
+	# my $blog_id = $self->blog_id;
+	# my $username = $self->username;
+	# my $password = $self->password;
 
-	if ($self->_call_has_fault($call)){
-		return;
-	}
+	# my $call = $self->server->call(
+		# 'wp.getPageTemplates',
+		# $blog_id,
+		# $username,
+		# $password,
+	# );
 
-	my $result = $call->result;
-	defined $result
-		or die('no result');
+	# if ($self->_call_has_fault($call)){
+		# return;
+	# }
 
-	return $result;
-}
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
+
+	# return $result;
+# }
 
 
 
@@ -1132,30 +1192,32 @@ sub getPostStatusList {
 	return $result;
 }
 
-# xmlrpc.php: function wp_getTags
-sub getTags {
-	my $self = shift;
-	my $blog_id = $self->blog_id;
-	my $username = $self->username;
-	my $password = $self->password;
+#
+# OBSELETE
+# # xmlrpc.php: function wp_getTags
+# sub getTags {
+	# my $self = shift;
+	# my $blog_id = $self->blog_id;
+	# my $username = $self->username;
+	# my $password = $self->password;
 
-	my $call = $self->server->call(
-		'wp.getTags',
-		$blog_id,
-		$username,
-		$password,
-	);
+	# my $call = $self->server->call(
+		# 'wp.getTags',
+		# $blog_id,
+		# $username,
+		# $password,
+	# );
 
-	if ($self->_call_has_fault($call)){
-		return;
-	}
+	# if ($self->_call_has_fault($call)){
+		# return;
+	# }
 
-	my $result = $call->result;
-	defined $result
-		or die('no result');
+	# my $result = $call->result;
+	# defined $result
+		# or die('no result');
 
-	return $result;
-}
+	# return $result;
+# }
 
 
 # xmlrpc.php: function wp_newComment
@@ -1216,10 +1278,12 @@ sub setOptions {
 	return $result;
 }
 
+# New methods as of 3.5...
+# getUser getUsers getProfile editProfile
+
 
 sub _is_number { $_[0]=~/^\d+$/ ? $_[0] : confess("Argument '$_[0] ' is not number") }
 sub _is_href { ($_[0] and (ref $_[0]) and (ref $_[0] eq 'HASH')) ? $_[0] : confess("Expected argument to be hashref/struct") }
-1;
 
 __END__
 # lib/WordPress/XMLRPC.pod
