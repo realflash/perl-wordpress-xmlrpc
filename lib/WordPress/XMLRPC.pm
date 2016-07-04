@@ -870,15 +870,6 @@ sub getUsersBlogs {
 	return $result;
 }
 
-
-
-
-# new methods as of 2.8.4 ...
-# deleteCategory deleteComment editComment getComment getCommentCount getCommentStatusList
-# getComments getOptions getPageStatusList getPageTemplates getPostStatusList
-# getTags newComment setOptions
-
-
 # OBSELETE
 # xmlrpc.php: function wp_deleteCategory
 # sub deleteCategory {
