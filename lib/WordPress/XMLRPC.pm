@@ -121,7 +121,7 @@ sub server {
    return $self->{server};
 }
 
-sub _call_has_fault {
+sub call_has_fault {
    my $self = shift;
    my $call = shift;
    defined $call or confess('no call passed');
@@ -157,7 +157,7 @@ sub _process_response
 	my $self = shift;
 	my $response = shift;
 
-	my $err = $self->_call_has_fault($response);
+	my $err = $self->call_has_fault($response);
 	if ($err)
 	{
 		return { error => $err, result => undef };
