@@ -2,30 +2,32 @@ package WordPress::XMLRPC;
 use warnings;
 use strict;
 use Carp;
-use LEOCHARRE::Debug;
+use Data::Dumper;
 use vars qw($VERSION $DEBUG);
 $VERSION = sprintf "%d.%02d", q$Revision: 1.30 $ =~ /(\d+)/g;
 
-# METHOD LIST
+# WP XML-RPC API METHOD LIST
+# All the following methods are in the standard API https://codex.wordpress.org/XML-RPC_WordPress_API
+#
 # WP API METHOD			MODULE METHOD		RELEVANT OBSELETE METHOD	SINCE
 # wp.getPost 			getPost			getPage 				3.4
 # wp.getPosts			-			getRecentPosts,getPages,getPageList	3.4
 # wp.newPost			newPost			newPage					3.4
 # wp.editPost			editPost		editPage				3.4
 # wp.deletePost			deletePost							3.4
-# wp.getPostType										3.4
-# wp.getPostTypes										3.4
-# wp.getPostFormats										3.4
+# wp.getPostType		-								3.4
+# wp.getPostTypes		-								3.4
+# wp.getPostFormats		-								3.4
 # wp.getPostStatusList		getPostStatusList	getPageStatusList 			3.4
-# wp.getTaxonomy					getCategories,getTags			3.4
-# wp.getTaxonomies										3.4
-# wp.getTerm											3.4
-# wp.getTerms											3.4
-# wp.newTerm						newCategory				3.4
-# wp.editTerm											3.4
-# wp.deleteTerm						deleteCategory				3.4
-# wp.getMediaItem										3.1
-# wp.getMediaLibrary										3.1
+# wp.getTaxonomy		-			getCategories,getTags			3.4
+# wp.getTaxonomies		-								3.4
+# wp.getTerm			-								3.4
+# wp.getTerms			-								3.er
+# wp.newTerm			-			newCategory				3.4
+# wp.editTerm			-								3.4
+# wp.deleteTerm			-			deleteCategory				3.4
+# wp.getMediaItem		-								3.1
+# wp.getMediaLibrary		-								3.1
 # wp.uploadFile			uploadFile							3.1
 # wp.getCommentCount		getCommentCount							2.7
 # wp.getComment			getComment							2.7
@@ -38,12 +40,17 @@ $VERSION = sprintf "%d.%02d", q$Revision: 1.30 $ =~ /(\d+)/g;
 # wp.setOptions			setOptions 							2.6
 # wp.getUsersBlogs		getUsersBlogs 							2.something
 # wp.getUser			getUser								3.5
-# wp.getUsers											3.5
-# wp.getProfile											3.5
-# wp.editProfile										3.5
+# wp.getUsers			-								3.5
+# wp.getProfile			-								3.5
+# wp.editProfile		-								3.5
 # wp.getAuthors			getAuthors							2.something
+#
+# WP ADDITIONAL METHOD LIST
+# These methods are in the internal WP API that is not normally available over XML-RPC. They can be 
+# individually enabled using the plug-in at https://github.com/realflash/extended-xmlrpc-api
+# wp_create_user		createUser
+# wp_insert_user		createOrUpdateUser
 
-sub xmlrpc_methods { qw/  suggestCategories getPageTemplates newMediaObjectgetTemplate setTemplate / }
 sub new {
    my ($class,$self) = @_;
    $self||={};
@@ -103,8 +110,6 @@ sub publish {
    return $self->{publish};
 }
 
-
-
 sub server {
    my $self = shift;
    unless( $self->{server} ){
@@ -125,7 +130,6 @@ sub _call_has_fault {
    #my $from = caller();   
    #my($package, $filename, $line, $subroutine, $hasargs,
    #   $wantarray, $evaltext, $is_require, $hints, $bitmask) = caller(1);
-      
 
    my $_err;
    for my $k( keys %$err ){
@@ -141,7 +145,6 @@ sub _call_has_fault {
    return $self->errstr;
 }
 
-
 sub errstr {
    my ($self,$val) = @_;
    $self->{errstr} = $val if defined $val;   
@@ -149,7 +152,24 @@ sub errstr {
    return $self->{errstr};
 }
 
+sub _process_response
+{
+	my $self = shift;
+	my $response = shift;
 
+	my $err = $self->_call_has_fault($response);
+	if ($err)
+	{
+		return { error => $err, result => undef };
+	}
+	my $result = $response->result;
+	defined $result	or die('no result');
+
+	return { error => undef, result => $response->result }; 
+}
+
+sub _is_number { $_[0]=~/^\d+$/ ? $_[0] : confess("Argument '$_[0] ' is not number") }
+sub _is_href { ($_[0] and (ref $_[0]) and (ref $_[0] eq 'HASH')) ? $_[0] : confess("Expected argument to be hashref/struct") }
 
 # helper for uploading media..
 
@@ -201,9 +221,6 @@ sub abs_path_to_media_object_data {
    }
 
 }
-
-
-
 
 # XML RPC METHODS
 
@@ -449,15 +466,7 @@ sub getAuthors {
 		$password,
 	);
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
 
@@ -589,15 +598,7 @@ sub newPost {
 		$publish,
 	);
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
 # xmlrpc.php: function mw_editPost
@@ -625,15 +626,7 @@ sub editPost {
 		$publish,
 	);
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
 # xmlrpc.php: function mw_getPost
@@ -652,15 +645,7 @@ sub getPost {
 		$user_pass,
 	);
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
 
@@ -767,15 +752,7 @@ sub deletePost {
 		$publish,
 	);
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
 
@@ -859,15 +836,7 @@ sub getUsersBlogs {
 		$user_pass,
 	);
 
-	if ( $self->_call_has_fault($call)){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
 # OBSELETE
@@ -916,15 +885,7 @@ sub deleteComment {
 		$comment_id,
 	);
 
-	if ( $self->_call_has_fault($call) ){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
 # xmlrpc.php: function wp_editComment
@@ -948,15 +909,7 @@ sub editComment {
 		$content_struct,
 	);
 
-	if ( $self->_call_has_fault($call) ){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
 
@@ -977,15 +930,7 @@ sub getComment {
 		$comment_id,
 	);
 
-	if ( $self->_call_has_fault($call) ){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
 # xmlrpc.php: function wp_getCommentCount
@@ -1005,15 +950,7 @@ sub getCommentCount {
 		$post_id,
 	);
 
-	if ( $self->_call_has_fault($call) ){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
 
@@ -1031,15 +968,7 @@ sub getCommentStatusList {
 		$password,
 	);
 
-	if ( $self->_call_has_fault($call) ){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
 
@@ -1060,15 +989,7 @@ sub getComments {
 		$struct,
 	);
 
-	if ( $self->_call_has_fault($call) ){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
 
@@ -1090,15 +1011,7 @@ sub getOptions {
 
    $call or warn("no call");
 
-	if ( $self->_call_has_fault($call) ){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
 
@@ -1172,15 +1085,7 @@ sub getPostStatusList {
 		$password,
 	);
 
-	if ($self->_call_has_fault($call)){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
 #
@@ -1230,15 +1135,7 @@ sub newComment {
 		$content_struct,
 	);
 
-	if ($self->_call_has_fault($call)){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
 
@@ -1258,15 +1155,7 @@ sub setOptions {
 		$options,
 	);
 
-	if ($self->_call_has_fault($call)){
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result
-		or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
 # xmlrpc.php: function wp_getUser
@@ -1293,20 +1182,30 @@ sub getUser {
 		$fields
 	);
 
-	if ($self->_call_has_fault($call))
-	{
-		return;
-	}
-
-	my $result = $call->result;
-	defined $result	or die('no result');
-
-	return $result;
+	return _process_response($call);
 }
 
+sub createUser
+{
+	my $self = shift;
+	my $username = $self->username;
+	my $password = $self->password;
+	my $user = shift;
 
-sub _is_number { $_[0]=~/^\d+$/ ? $_[0] : confess("Argument '$_[0] ' is not number") }
-sub _is_href { ($_[0] and (ref $_[0]) and (ref $_[0] eq 'HASH')) ? $_[0] : confess("Expected argument to be hashref/struct") }
+	$user = undef unless defined($user);
+	croak('Missing argument - hash reference of user information') unless defined($user);
+	croak('Argument is not a hash reference') unless ref $user eq 'HASH';
+
+	my $call = $self->server->call(
+		'wpext.callWpMethod',
+		$username,
+		$password,
+		'wp_insert_user',
+		$user
+	);
+
+	return _process_response($call);
+}
 
 __END__
 # lib/WordPress/XMLRPC.pod
