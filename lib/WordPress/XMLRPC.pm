@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use Data::Dumper;
 use vars qw($VERSION $DEBUG);
-$VERSION = sprintf "%d.%02d", q$Revision: 1.30 $ =~ /(\d+)/g;
+$VERSION = sprintf "%d.%02d", q$Revision: 2.00 $ =~ /(\d+)/g;
 
 # WP XML-RPC API METHOD LIST
 # All the following methods are in the standard API https://codex.wordpress.org/XML-RPC_WordPress_API
@@ -22,7 +22,7 @@ $VERSION = sprintf "%d.%02d", q$Revision: 1.30 $ =~ /(\d+)/g;
 # wp.getTaxonomy		-			getCategories,getTags			3.4
 # wp.getTaxonomies		-								3.4
 # wp.getTerm			-								3.4
-# wp.getTerms			-								3.er
+# wp.getTerms			-								3.4
 # wp.newTerm			-			newCategory				3.4
 # wp.editTerm			-								3.4
 # wp.deleteTerm			-			deleteCategory				3.4
@@ -121,7 +121,7 @@ sub server {
    return $self->{server};
 }
 
-sub call_has_fault {
+sub _call_has_fault {
    my $self = shift;
    my $call = shift;
    defined $call or confess('no call passed');
@@ -157,7 +157,7 @@ sub _process_response
 	my $self = shift;
 	my $response = shift;
 
-	my $err = $self->call_has_fault($response);
+	my $err = $self->_call_has_fault($response);
 	if ($err)
 	{
 		return { error => $err, result => undef };
@@ -466,7 +466,7 @@ sub getAuthors {
 		$password,
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 
@@ -598,7 +598,7 @@ sub newPost {
 		$publish,
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 # xmlrpc.php: function mw_editPost
@@ -626,7 +626,7 @@ sub editPost {
 		$publish,
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 # xmlrpc.php: function mw_getPost
@@ -645,7 +645,7 @@ sub getPost {
 		$user_pass,
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 
@@ -752,7 +752,7 @@ sub deletePost {
 		$publish,
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 
@@ -836,7 +836,7 @@ sub getUsersBlogs {
 		$user_pass,
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 # OBSELETE
@@ -885,7 +885,7 @@ sub deleteComment {
 		$comment_id,
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 # xmlrpc.php: function wp_editComment
@@ -909,7 +909,7 @@ sub editComment {
 		$content_struct,
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 
@@ -930,7 +930,7 @@ sub getComment {
 		$comment_id,
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 # xmlrpc.php: function wp_getCommentCount
@@ -950,7 +950,7 @@ sub getCommentCount {
 		$post_id,
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 
@@ -968,7 +968,7 @@ sub getCommentStatusList {
 		$password,
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 
@@ -989,7 +989,7 @@ sub getComments {
 		$struct,
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 
@@ -1011,7 +1011,7 @@ sub getOptions {
 
    $call or warn("no call");
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 
@@ -1085,7 +1085,7 @@ sub getPostStatusList {
 		$password,
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 #
@@ -1135,7 +1135,7 @@ sub newComment {
 		$content_struct,
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 
@@ -1155,7 +1155,7 @@ sub setOptions {
 		$options,
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 # xmlrpc.php: function wp_getUser
@@ -1182,7 +1182,7 @@ sub getUser {
 		$fields
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 sub createUser
@@ -1192,9 +1192,16 @@ sub createUser
 	my $password = $self->password;
 	my $user = shift;
 
+	# Check arguments
 	$user = undef unless defined($user);
 	croak('Missing argument - hash reference of user information') unless defined($user);
 	croak('Argument is not a hash reference') unless ref $user eq 'HASH';
+	croak('User information must contain user_login') unless defined($user->{'user_login'});
+	croak('User information must contain user_email') unless defined($user->{'user_email'});
+	croak('User information must contain user_password') unless defined($user->{'user_pass'});
+	
+	# Manipulate arguments
+	$user->{'role'} = lc($user->{'role'}) if defined($user->{'role'});	# otherwise they don't match with real WP roles
 
 	my $call = $self->server->call(
 		'wpext.callWpMethod',
@@ -1204,7 +1211,7 @@ sub createUser
 		$user
 	);
 
-	return _process_response($call);
+	return $self->_process_response($call);
 }
 
 __END__
