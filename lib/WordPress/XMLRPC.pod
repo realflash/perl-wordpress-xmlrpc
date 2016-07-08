@@ -138,7 +138,7 @@ If the DEBUG flag is on, this warns to STDERR automatically as well.
 
 =pod
 
-=head2 XML RPC METHODS
+=head2 STANDARD XML RPC METHODS
 
 These methods specifically mirror the xmlrpc.php file provided by WordPress installations.
 This file sits on your website.
@@ -449,6 +449,81 @@ Example return :
 	         url => 'http://leocharre.com/'
 	       }
 	     ]
+
+=head3 getUser()
+
+Get a specific user by ID. 
+
+Examples:
+
+	$o->getUser({id => 27});
+	$o->getUser({id => 27, fields => ['nickname', 'email']);
+
+Arguments:
+
+=over
+
+=item * 
+B<id> (I<mandatory>) The ID of the user to retrieve
+
+=item *
+B<fields> (I<optional>) An array reference of fields to return. I<user_id> is always returned. See L<https://codex.wordpress.org/XML-RPC_WordPress_API/Users#wp.getUser> for a list of fields.
+
+=back
+
+Returns:
+
+	{
+          'roles' => [
+                     'administrator'
+                   ],
+          'registered' => '20160211T14:12:31',
+          'nickname' => 'administrator',
+          'display_name' => 'administrator',
+          'last_name' => '',
+          'username' => 'administrator',
+          'email' => 'hostmaster@virtualclarity.com',
+          'nicename' => 'administrator',
+          'url' => '',
+          'user_id' => '1',
+          'bio' => '',
+          'first_name' => ''
+        };
+
+unless you specify 'fields', in which case it returns just those fields plus user_id.
+
+=head2 EXTENDED XML RPC CALLS
+
+The following calls are not part of the standard WP XML RPC API. To enable them to work you will need to install the Extended XMLAPC API plugin available at L<https://github.com/realflash/extended-xmlrpc-api>, and configure it to permit the relevant WP API methods described below. For example, I<getUsers()> will not work until you have enabled I<wp_create_user> in your WordPress instance. Until that time you will just get a no such method error.
+
+=head3 createUser()
+
+=head4 WP API method: wp_create_user
+
+Make a new user. 
+
+Example:
+	
+	# Minimum possible information - no capabilities so can't do much
+	$o->createUser({ user_login => 'atest.user2', user_pass => 'klsdfslfhew', user_email => 'test.user@mywordpressite.com'});
+	# Minium useful information
+	$o->createUser({ user_login => 'atest.user2', user_pass => 'klsdfslfhew', user_nicename => 'test-user', display_name => 'Test User', first_name => 'Test', last_name => 'User', role => 'author', user_email => 'test.user@mywordpressite.com'});
+
+
+Arguments:
+
+=over
+
+=item * 
+(I<mandatory>) A hash reference of arguments to pass to wp_create_user. You must specify at least I<user_login>,I<user_pass> and I<user_email>. See L<https://codex.wordpress.org/Function_Reference/wp_insert_user> for the list of arguments.
+
+=back
+
+Returns:
+
+	113
+
+for example, which is the user_id the newly created user.
 
 =head1 DEBUG
 

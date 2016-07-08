@@ -1158,20 +1158,22 @@ sub setOptions {
 	return $self->_process_response($call);
 }
 
-# xmlrpc.php: function wp_getUser
+# TESTED FROM HERE
+
 sub getUser {
 	my $self = shift;
 	my $blog_id = $self->blog_id;
 	my $username = $self->username;
 	my $password = $self->password;
-	my $user_id = shift;
-	my $fields = shift;
+	my $args = shift;
+	my $user_id = $args->{'id'};
+	my $fields = $args->{'fields'};
 
-	defined $user_id or confess('missing user id');
+	defined $user_id or confess("Argument 'id' is missing");
 	_is_number($user_id);
 	
 	$fields = undef unless defined($fields);
-	croak('arg is not array ref') if defined($fields) and ref $fields ne 'ARRAY';
+	croak("Argument 'fields' is not an array reference") if defined($fields) and ref $fields ne 'ARRAY';
 
 	my $call = $self->server->call(
 		'wp.getUser',
@@ -1179,6 +1181,32 @@ sub getUser {
 		$username,
 		$password,
 		$user_id,
+		$fields
+	);
+
+	return $self->_process_response($call);
+}
+
+sub getUsers {
+	my $self = shift;
+	my $blog_id = $self->blog_id;
+	my $username = $self->username;
+	my $password = $self->password;
+	my $args = shift;
+	my $filter = $args->{'filter'};
+	my $fields = $args->{'fields'};
+
+	$fields = undef unless defined($fields);
+	croak("Argument 'fields' is not an array reference") if defined($fields) and ref $fields ne 'ARRAY';
+	$filter = undef unless defined($filter);
+	croak("Argument 'filter' is not a hash reference") if defined($filter) and ref $filter ne 'HASH';
+
+	my $call = $self->server->call(
+		'wp.getUsers',
+		$blog_id,
+		$username,
+		$password,
+		$filter,
 		$fields
 	);
 
