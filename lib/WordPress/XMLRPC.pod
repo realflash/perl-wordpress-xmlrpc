@@ -482,7 +482,7 @@ Returns:
           'display_name' => 'administrator',
           'last_name' => '',
           'username' => 'administrator',
-          'email' => 'hostmaster@virtualclarity.com',
+          'email' => 'hostmaster@company.com',
           'nicename' => 'administrator',
           'url' => '',
           'user_id' => '1',
@@ -492,13 +492,73 @@ Returns:
 
 unless you specify 'fields', in which case it returns just those fields plus user_id.
 
+=head3 getUsers()
+
+Get a list of users.
+
+Examples:
+
+	$o->getUsers();
+	$o->getUser({filter => {roles => 'administrator'}, fields => ['nickname', 'email']);
+
+Arguments:
+
+=over
+
+=item * 
+B<filter> (I<optional>) A hash reference of filter values to select specific users. Filtering is carried out on the WordPress server. See L<https://codex.wordpress.org/XML-RPC_WordPress_API/Users#wp.getUsers> for a list of values.
+
+=item *
+B<fields> (I<optional>) An array reference of fields to return. I<user_id> is always returned. See L<https://codex.wordpress.org/XML-RPC_WordPress_API/Users#wp.getUser> for a list of fields. Has no efffect unless you also specify B<filter> (because WordPress is weird).
+
+=back
+
+Returns:
+
+	[
+         {
+            'roles' => [
+                       'author'
+                     ],
+            'registered' => '20160509T13:40:20',
+            'nickname' => 'Mariann Ratz',
+            'display_name' => 'Mariann Ratz',
+            'last_name' => 'Ratz',
+            'username' => 'Mariann.ratz',
+            'email' => 'Mariann.ratz@company.com',
+            'nicename' => 'mariann-ratz',
+            'url' => '',
+            'user_id' => '42',
+            'bio' => '',
+            'first_name' => 'Mariann'
+          },
+          {
+            'roles' => [
+                       'author'
+                     ],
+            'registered' => '20160322T12:56:55',
+            'nickname' => 'Mark Orkden',
+            'display_name' => 'Mark Orkden',
+            'last_name' => 'Orkden',
+            'username' => 'mark.orkden',
+            'email' => 'mark.orkden@company.com',
+            'nicename' => 'mark-orkden',
+            'url' => '',
+            'user_id' => '17',
+            'bio' => '',
+            'first_name' => 'Mark'
+          }
+        ];
+
+unless you specify 'fields', in which case it returns just those fields plus user_id.
+
 =head2 EXTENDED XML RPC CALLS
 
-The following calls are not part of the standard WP XML RPC API. To enable them to work you will need to install the Extended XMLAPC API plugin available at L<https://github.com/realflash/extended-xmlrpc-api>, and configure it to permit the relevant WP API methods described below. For example, I<getUsers()> will not work until you have enabled I<wp_create_user> in your WordPress instance. Until that time you will just get a no such method error.
+The following calls are not part of the standard WP XML RPC API. To enable them to work you will need to install the Extended XMLAPC API plugin available at L<https://github.com/realflash/extended-xmlrpc-api>, and configure it to permit the relevant WP API methods described below. For example, I<createUser()> will not work until you have enabled I<wp_create_user> in your WordPress instance. Until that time you will just get a no such method error.
 
 =head3 createUser()
 
-=head4 WP API method: wp_create_user
+=head4 WP API method: wp_insert_user
 
 Make a new user. 
 
