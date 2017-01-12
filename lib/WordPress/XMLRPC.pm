@@ -3,8 +3,9 @@ use warnings;
 use strict;
 use Carp;
 use Data::Dumper;
+use Scalar::Util qw(looks_like_number);
 use vars qw($VERSION $DEBUG);
-$VERSION = sprintf "%d.%02d", q$Revision: 2.00 $ =~ /(\d+)/g;
+$VERSION = sprintf "%d.%02d", q$Revision: 2.10 $ =~ /(\d+)/g;
 
 # WP XML-RPC API METHOD LIST
 # All the following methods are in the standard API https://codex.wordpress.org/XML-RPC_WordPress_API
@@ -40,7 +41,7 @@ $VERSION = sprintf "%d.%02d", q$Revision: 2.00 $ =~ /(\d+)/g;
 # wp.setOptions			setOptions 							2.6
 # wp.getUsersBlogs		getUsersBlogs 							2.something
 # wp.getUser			getUser								3.5
-# wp.getUsers			-								3.5
+# wp.getUsers			getUsers							3.5
 # wp.getProfile			-								3.5
 # wp.editProfile		-								3.5
 # wp.getAuthors			getAuthors							2.something
@@ -48,8 +49,8 @@ $VERSION = sprintf "%d.%02d", q$Revision: 2.00 $ =~ /(\d+)/g;
 # WP ADDITIONAL METHOD LIST
 # These methods are in the internal WP API that is not normally available over XML-RPC. They can be 
 # individually enabled using the plug-in at https://github.com/realflash/extended-xmlrpc-api
-# wp_create_user		createUser
-# wp_insert_user		createOrUpdateUser
+# wp_insert_user		createUser
+# add_user_meta			addUserMeta
 
 sub new {
    my ($class,$self) = @_;
@@ -1242,5 +1243,33 @@ sub createUser
 	return $self->_process_response($call);
 }
 
+sub addUserMeta 
+{
+	my $self = shift;
+	my $username = $self->username;
+	my $password = $self->password;
+	my $meta = shift;
+
+	# Check arguments
+	$meta = undef unless defined($meta);
+	croak('Missing argument - hash reference of user meta') unless defined($meta);
+	croak('Argument is not a hash reference') unless ref $meta eq 'HASH';
+	croak('User information must contain user_id') unless defined($meta->{'user_id'});
+	croak('user_id isn\'t a number') unless looks_like_number($meta->{'user_id'});
+	croak('User information must contain meta_key') unless defined($meta->{'meta_key'});
+	croak('User information must contain meta_value') unless defined($meta->{'meta_value'});
+	$meta->{'unique'} = 'false' unless defined($meta->{'unique'});
+	croak('Unique should be "true" or "false"') unless ($meta->{'unique'} eq "true" || $meta->{'unique'} eq "false");
+	
+	my $call = $self->server->call(
+		'wpext.callWpMethod',
+		$username,
+		$password,
+		'add_user_meta',
+		$meta->{'user_id'}, $meta->{'meta_key'}, $meta->{'meta_value'}, $meta->{'unique'}
+	);
+
+	return $self->_process_response($call);
+}
 __END__
 # lib/WordPress/XMLRPC.pod

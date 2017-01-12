@@ -499,7 +499,7 @@ Get a list of users.
 Examples:
 
 	$o->getUsers();
-	$o->getUser({filter => {roles => 'administrator'}, fields => ['nickname', 'email']);
+	$o->getUsers({filter => {roles => 'administrator'}, fields => ['nickname', 'email']);
 
 Arguments:
 
@@ -585,6 +585,33 @@ Returns:
 
 for example, which is the user_id the newly created user.
 
+=head3 addUserMeta()
+
+=head4 WP API method: add_user_meta
+
+Add a piece of metadata to a user.
+
+Examples:
+
+	$o->addUserMeta({ user_id => 23, meta_key => 'foo', meta_value => 'bar'});
+	$o->addUserMeta({ user_id => 23, meta_key => 'foo', meta_value => 'bar', unique => 'true'});
+	$o->addUserMeta({ user_id => 23, meta_key => 'foo', meta_value => 'bar', unique => 'false'});
+
+Arguments:
+
+=over
+
+=item * 
+(I<mandatory>) A hash reference of arguments to pass to wp_create_user. You must specify at least I<user_id>, I<meta_key>, and I<meta_value>. See L<https://codex.wordpress.org/Function_Reference/add_user_meta> for the list of arguments.
+
+=back
+
+Returns:
+
+	2437
+
+for example, which is the unique key for the database row inserted successfully with the piece of meta information, or 0 if it was unsuccessful.
+
 =head1 DEBUG
 
 This is useful if you get errors..
@@ -616,7 +643,8 @@ WordPress L<http://wordpress.org>
 
 =head1 AUTHOR
 
-Leo Charre leocharre at cpan dot org
+Originally by Leo Charre leocharre at cpan dot org
+Adopted by Ian Gibbs igibbs at cpan dot org
 
 =head2 THANKS
 
