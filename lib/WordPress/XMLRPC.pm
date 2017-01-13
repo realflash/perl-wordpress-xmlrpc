@@ -5,7 +5,7 @@ use Carp;
 use Data::Dumper;
 use Scalar::Util qw(looks_like_number);
 use vars qw($VERSION $DEBUG);
-$VERSION = sprintf "%d.%02d", q$Revision: 2.10 $ =~ /(\d+)/g;
+$VERSION = sprintf "%d.%02d", q$Revision: 2.11 $ =~ /(\d+)/g;
 
 # WP XML-RPC API METHOD LIST
 # All the following methods are in the standard API https://codex.wordpress.org/XML-RPC_WordPress_API
@@ -51,6 +51,7 @@ $VERSION = sprintf "%d.%02d", q$Revision: 2.10 $ =~ /(\d+)/g;
 # individually enabled using the plug-in at https://github.com/realflash/extended-xmlrpc-api
 # wp_insert_user		createUser
 # add_user_meta			addUserMeta
+# get_user_meta			getUserMeta
 
 sub new {
    my ($class,$self) = @_;
@@ -1267,6 +1268,34 @@ sub addUserMeta
 		$password,
 		'add_user_meta',
 		$meta->{'user_id'}, $meta->{'meta_key'}, $meta->{'meta_value'}, $meta->{'unique'}
+	);
+
+	return $self->_process_response($call);
+}
+
+sub getUserMeta 
+{
+	my $self = shift;
+	my $username = $self->username;
+	my $password = $self->password;
+	my $meta = shift;
+
+	# Check arguments
+	$meta = undef unless defined($meta);
+	croak('Missing argument - hash reference of user meta requirements') unless defined($meta);
+	croak('Argument is not a hash reference') unless ref $meta eq 'HASH';
+	croak('User information must contain user_id') unless defined($meta->{'user_id'});
+	croak('user_id isn\'t a number') unless looks_like_number($meta->{'user_id'});
+	$meta->{'meta_key'} = '' unless defined($meta->{'meta_key'});
+	$meta->{'single'} = 'false' unless defined($meta->{'single'});
+	croak('Single should be "true" or "false"') unless ($meta->{'single'} eq "true" || $meta->{'single'} eq "false");
+	
+	my $call = $self->server->call(
+		'wpext.callWpMethod',
+		$username,
+		$password,
+		'get_user_meta',
+		$meta->{'user_id'}, $meta->{'meta_key'}, $meta->{'single'}
 	);
 
 	return $self->_process_response($call);

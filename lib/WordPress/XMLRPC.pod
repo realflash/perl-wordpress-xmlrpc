@@ -612,6 +612,51 @@ Returns:
 
 for example, which is the unique key for the database row inserted successfully with the piece of meta information, or 0 if it was unsuccessful.
 
+=head3 getUserMeta()
+
+=head4 WP API method: get_user_meta
+
+Add a piece of metadata to a user.
+
+Examples:
+
+	$o->getUserMeta({ user_id => 23 });
+	$o->getUserMeta({ user_id => 23, meta_key => 'foo'});
+	$o->getUserMeta({ user_id => 23, meta_key => 'foo', single => 'true'});
+
+Arguments:
+
+=over
+
+=item * 
+(I<mandatory>) A hash reference of arguments to pass to wp_create_user. You must specify at least I<user_id>. See L<https://codex.wordpress.org/Function_Reference/get_user_meta> for the list of arguments.
+
+=back
+
+Returns:
+
+	{
+		'show_admin_bar_front' => [ 'true' ],
+		'npn_mailnotify' => [ '1' ],
+		'wp_4mv06tbsd5_capabilities' => [ 'a:1:{s:6:"author";b:1;}' ],
+		'nickname' => [ 'Abdul Hafaaz' ],
+		'session_tokens' => [ 'a:1:{s:64:"6df58d104147ce47eba41dd2f6e86a9c144659d4f4b095385eeeea2e26c7bef0";a:4:{s:10:"expiration";i:1482412957;s:2:"ip";s:13:"108.18.98.132";s:2:"ua";s:134:"Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_5 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13G36 Safari/601.1";s:5:"login";i:1482240157;}}' ],
+		'comment_shortcuts' => [ 'false' ],
+		'rich_editing' => [ 'true' ],
+		'description' => [ '' ],
+		'last_name' => [ 'Hafaaz' ],
+		'use_ssl' => [ '0' ],
+		'wp_4mv06tbsd5_user_level' => [ '2' ],
+		'admin_color' => [ 'fresh' ],
+		'first_name' => [ 'Abdul' ]
+	}
+
+for example, if you don't specify which key you want. Actual fields will depend upon which plugins you have installed and database table names. Note that each value in the hash is an array, even if there is only one value to display. If you specify I<meta_key>, you will just get the value of that key:
+
+	bar
+
+or an empty string if that key doesn't exist.
+
 =head1 DEBUG
 
 This is useful if you get errors..
