@@ -5,7 +5,7 @@ use Carp;
 use Data::Dumper;
 use Scalar::Util qw(looks_like_number);
 use vars qw($VERSION $DEBUG);
-$VERSION = sprintf "%d.%02d", q$Revision: 2.11 $ =~ /(\d+)/g;
+$VERSION = sprintf "%d.%02d", q$Revision: 2.12 $ =~ /(\d+)/g;
 
 # WP XML-RPC API METHOD LIST
 # All the following methods are in the standard API https://codex.wordpress.org/XML-RPC_WordPress_API
